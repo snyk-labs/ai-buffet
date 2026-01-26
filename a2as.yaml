@@ -1,0 +1,85 @@
+manifest:
+  version: "0.1.2"
+  schema: https://a2as.org/cert/schema
+  subject:
+    name: snyk-labs/ai-buffet
+    source: https://github.com/snyk-labs/ai-buffet
+    branch: main
+    commit: "83c5cf79"
+    scope: [mcp/client.py, agent.py]
+  issued:
+    by: A2AS.org
+    at: '2026-01-26T16:11:15Z'
+  signatures:
+    digest: sha256:0kgx3Sk3AcQiEP9tEuFqsSyjjJIZom0GHFqsDdc9QrI
+    key: ed25519:L66iN4BaSdOH98z9ZrvwKuIqthliJFA0mvff5CxPJoI
+    sig: ed25519:HjZFGtMFNN0e5XP7NKmNjF_kybgAQbWuCB6Q1sDSa5ZUpIDud-LmiKwtBQY1sAmd5xwsZ0KG4F7REqHl7MpVBA
+
+agents:
+  agent:
+    type: instance
+    models: [gpt-4.1]
+    mcp: [server]
+    params:
+      function: run
+      name: Assistant
+      model_settings: ModelSettings(model='gpt-3.5-turbo', tool_choice=required)
+      instructions: [Use the tools to answer the questions.]
+
+models:
+  gpt-4.1:
+    type: default
+    agents: [agent]
+
+mcp:
+  server:
+    type: network
+    url: http://localhost:8000/sse
+    agents: [agent]
+    params:
+      class: MCPServerSse
+      name: SSE Python Server
+      alias: [mcp_server]
+
+imports:
+  Agent: agents.Agent
+  asyncio: asyncio
+  DuckDuckGoSearchTool: smolagents.tools.DuckDuckGoSearchTool
+  gen_trace_id: agents.gen_trace_id
+  MCPServer: agents.mcp.MCPServer
+  MCPServerSse: agents.mcp.MCPServerSse
+  Memory: smolagents.memory.Memory
+  ModelSettings: agents.model_settings.ModelSettings
+  OpenAIWrapper: smolagents.llms.OpenAIWrapper
+  os: os
+  PythonREPLTool: smolagents.tools.PythonREPLTool
+  Runner: agents.Runner
+  trace: agents.trace
+  ZeroShotAgent: smolagents.agents.ZeroShotAgent
+
+functions:
+  main:
+    type: async
+    module: mcp.client
+  run:
+    type: async
+    module: mcp.client
+    args: [mcp_server]
+
+variables:
+  OPENAI_KEY:
+    type: env
+    params:
+      caller: [os.environ.get, OpenAIWrapper]
+      path: [agent]
+
+networks:
+  localhost:
+    type: api
+    actions: [connect]
+    urls: [/sse]
+    protocols: [http]
+    ports: ["8000"]
+    params:
+      caller: [MCPServerSse]
+      links: [server]
