@@ -1,0 +1,29 @@
+{
+  "name": "typescript-ai-buffet",
+  "version": "1.0.0",
+  "description": "TypeScript examples of AI usage",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "langchain": "tsx langchain-example.ts",
+    "chatbot": "tsx chatbot.ts",
+    "openai-raw": "tsx openai-raw.ts",
+    "openai-sdk": "tsx openai-sdk.ts",
+    "openai-streaming": "tsx openai-streaming.ts",
+    "openai-images": "tsx openai-images.ts",
+    "agent-calculator": "tsx agent-calculator.ts"
+  },
+  "dependencies": {
+    "openai": "^4.0.0",
+    "@anthropic-ai/sdk": "^0.32.0",
+    "@langchain/core": "^0.3.0",
+    "@langchain/openai": "^0.3.0",
+    "langchain": "^0.3.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

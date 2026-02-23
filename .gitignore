@@ -1,5 +1,12 @@
-__pycache__
+# Python
+python/__pycache__
 /output/
-depgraphs
-venv
-aisboms
+/python/depgraphs
+/python/venv
+/python/aisboms
+
+# TypeScript
+typescript/node_modules/
+typescript/dist/
+typescript/*.tsbuildinfo
+typescript/generated-image-url.txt
