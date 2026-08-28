@@ -10,5 +10,6 @@ This repo is meant to showcase the capabilities of our **ai-bom** tool by provid
 | ------------ | ------------ | ----------- |
 | **Python**   | [python/](python/)   | Anthropic chatbot, melody generation; model usage and transitive AI dependency detection. |
 | **TypeScript** | [typescript/](typescript/) | LangChain, Anthropic chatbot, OpenAI (SDK, raw fetch, streaming, images), agent with tools. |
+| **Java**     | [java/](java/)       | LangChain4j, Anthropic chatbot, OpenAI (SDK, raw HTTP, streaming, images), agent with calculator tool; real-world customer support agent adapted from LangChain4j examples. |
 
 See each directory’s README for setup and how to run the examples.
