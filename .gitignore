@@ -10,3 +10,8 @@ typescript/node_modules/
 typescript/dist/
 typescript/*.tsbuildinfo
 typescript/generated-image-url.txt
+
+# Java
+java/target/
+java/.m2/
+java/generated-image-url.txt
