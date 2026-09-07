@@ -17,7 +17,7 @@
     "openai": "^4.0.0",
     "@anthropic-ai/sdk": "^0.32.0",
     "@langchain/core": "^0.3.0",
-    "@langchain/openai": "^0.3.0",
+    "@langchain/openai": "^0.6.17",
     "langchain": "^0.3.0",
     "zod": "^3.23.0"
   },
