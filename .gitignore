@@ -15,3 +15,6 @@ typescript/generated-image-url.txt
 java/target/
 java/.m2/
 java/generated-image-url.txt
+
+# Go
+go/generated-image-url.txt
