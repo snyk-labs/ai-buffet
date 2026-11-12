@@ -1,0 +1,89 @@
+name: AI-BOM policy gate
+
+# pull_request only. Never pull_request_target: it runs with the base repo's
+# secrets and write token, which is unsafe when the job checks out PR code.
+on:
+  pull_request:
+
+# Least privilege: the job only needs to read the repo contents.
+permissions:
+  contents: read
+
+jobs:
+  ai-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      SNYK_ORG_ID: ${{ vars.SNYK_ORG_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Exact pin; snyk aibom test requires v1.1304.0 or later.
+      - name: Install Snyk CLI
+        run: |
+          npm install --global snyk@1.1304.0
+          snyk --version
+
+      - name: Run snyk aibom test
+        run: |
+          # Fail before running the scanner if config is missing, so a missing
+          # secret/variable is never confused with a policy failure (exit 1).
+          : "${SNYK_TOKEN:?SNYK_TOKEN repository secret is not set}"
+          : "${SNYK_ORG_ID:?SNYK_ORG_ID repository variable is not set}"
+
+          # GitHub runs steps with `bash -e`; disable it so we can capture the
+          # exit code and map each one explicitly below.
+          set +e
+          snyk aibom test \
+            --org="$SNYK_ORG_ID" \
+            --severity-threshold=high \
+            --json-file-output=aibom-results.json
+          code=$?
+          set -e
+
+          case "$code" in
+            0)
+              # Scan completed and found no policy issues at HIGH or above.
+              echo "AI-BOM policy test passed."
+              ;;
+            1)
+              # Scan completed and found one or more policy issues at HIGH or
+              # above. This is the gate doing its job: fail the check.
+              echo "::error::AI-BOM policy test found issues at HIGH or above. See the ai-bom-results artifact."
+              exit 1
+              ;;
+            2)
+              # Scanner failure (network, auth, service error, ...). Fail closed:
+              # we do not know whether the PR violates policy, so it must not
+              # pass. Re-run the job; add -d to the command to get debug logs.
+              echo "::error::snyk aibom test failed (exit 2). Policy status is unknown, failing closed. Re-run the job."
+              exit 2
+              ;;
+            3)
+              # No supported files found, so nothing was evaluated. Treated as a
+              # failure (fail closed): a gate that silently passes on an empty
+              # scan can hide a wrong checkout path or a deleted AI footprint.
+              # To allow PRs with no AI code, change this branch to a warning
+              # and `exit 0`.
+              echo "::error::snyk aibom test found no supported files (exit 3). Nothing was evaluated, failing closed."
+              exit 3
+              ;;
+            *)
+              # Undocumented exit code. Fail closed.
+              echo "::error::snyk aibom test exited with unexpected code $code. Failing closed."
+              exit "$code"
+              ;;
+          esac
+
+      # Runs on success or failure (not on cancel) so results are kept for
+      # failed gates. The file is absent on exit 2/3, hence the warn.
+      - name: Upload AI-BOM results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-bom-results
+          path: aibom-results.json
+          if-no-files-found: warn
